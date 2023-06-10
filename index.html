@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <title>Document</title>
     <link rel="stylesheet" href = "style.css">
@@ -8,7 +9,7 @@
 </head>
 <body>
 <label for = "song">Song Name</label>
-<input type = "text" id="song" enterkeyhint="Song Name">
+<input type = "text" id="song">
 <label for = "artist">Artist</label>
 <input type = "text" id="artist">
 
@@ -19,40 +20,52 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function setLyrics() {
+    var isFetching = false;
+    function setLyrics(event) {
+        if (isFetching)
+        {
+            return;
+        }
         var artist = document.getElementById('artist');
         var song = document.getElementById('song');
         var lyricText = document.getElementById('lyrics');
         var rawhtml;
+
+        lyricText.innerText = "";
+        isFetching = true;
 
         fetch('https://www.lyrics.com/artist/' + artist.value)
             .then(response => response.text())
             .then(html => {
                 rawhtml = html;
                 const elements = $.parseHTML(rawhtml);
-                $(elements).find('*').each(function()
-                {
+                $(elements).find('*').each(function() {
                     var innerText = $(this).text();
-                    if (innerText.toLowerCase() === song.value.toLowerCase())
-                    {
+                    if (innerText.toLowerCase() === song.value.toLowerCase()) {
                         var newurl = 'https://www.lyrics.com' + $(this).attr('href');
                         fetch(newurl)
                             .then(response => response.text())
                             .then(html => {
                                 rawhtml = html;
                                 const newElements = $.parseHTML(rawhtml);
-                                document.getElementById('lyrics').innerText = newurl + '\n' + $(newElements).find('pre#lyric-body-text').text();
+                                lyricText.innerText = newurl + '\n' + $(newElements).find('pre#lyric-body-text').text();
                             })
                             .catch(error => {
-                                document.getElementById('lyrics').innerText = "failed";
+                                lyricText.innerText = "failed";
                             })
+                            .finally(() => {
+                                isFetching = false;
+                            });
                     }
                 });
             })
             .catch(error => {
                 lyricText.innerText = "failed";
+                isFetching = false;
             });
     }
+</script>
+
 
 
 </script>

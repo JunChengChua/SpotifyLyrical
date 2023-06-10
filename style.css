@@ -1,0 +1,10 @@
+body{
+    background-color: black;
+    color:white;
+    font-family:'Courier New';
+}
+
+#lyrics
+{
+    font-size:20px;
+}
